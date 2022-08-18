@@ -1,31 +1,32 @@
-import { AppError } from "../../../errors/AppError";
-import { prisma } from "../../../prisma/client";
-import { CreateMovieRentDTO } from "../dtos/CreateMovieRentDTO";
+import { AppError } from "../../../errors/AppError"; 
+import { prisma } from "../../../prisma/client"; 
+import { CreateMovieRentDTO } from "../dtos/CreateMovieRentDTO"; 
 
-export class CreateMovieRenteUeseCase {
-  async execute({ movieId, userId }: CreateMovieRentDTO) : Promise<void>{
-    //verificar se o filme existe
+export class CreateMovieRentUseCase {
+  async execute({ movieId, userId }: CreateMovieRentDTO): Promise<void> {
+    // verificar se filme existe
     const movieExists = await prisma.movie.findUnique({
       where: {
         id: movieId,
       },
     });
+
     if (!movieExists) {
       throw new AppError("Movie does not exists!");
     }
 
-    //verificar se já não está alugado
     const movieAlreadyRented = await prisma.movieRent.findFirst({
       where: {
         movieId,
       },
     });
 
+    // verificar se filme já nao está alugado
     if (movieAlreadyRented) {
       throw new AppError("Movie already rented!");
     }
 
-    //verificar a existencia do usuário
+    // verificar se usuário existe
     const userExists = await prisma.user.findUnique({
       where: {
         id: userId,
@@ -33,10 +34,10 @@ export class CreateMovieRenteUeseCase {
     });
 
     if (!userExists) {
-      throw new AppError("User does not  exist!");
+      throw new AppError("User does not exists!");
     }
 
-    //criar a locação
+    // criar locação
     await prisma.movieRent.create({
       data: {
         movieId,
